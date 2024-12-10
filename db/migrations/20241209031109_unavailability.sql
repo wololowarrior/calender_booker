@@ -7,7 +7,7 @@ CREATE TABLE unavailable_slots(
     start_time TIME,
     end_time TIME,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_users FOREIGN KEY (uid) REFERENCES Users(id)
+    CONSTRAINT fk_users FOREIGN KEY (uid) REFERENCES users(id)
 );
 -- +goose StatementEnd
 
