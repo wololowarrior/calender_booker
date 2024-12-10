@@ -40,6 +40,8 @@ func CreateEvent(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to create event", http.StatusInternalServerError)
 		return
 	}
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(event)
 }
 
 func GetEvents(w http.ResponseWriter, r *http.Request) {

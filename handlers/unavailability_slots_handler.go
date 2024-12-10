@@ -61,6 +61,7 @@ func CreateUnavailabilitySlots(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	w.WriteHeader(http.StatusCreated)
 }
 
 func GetUnavailabilitySlots(w http.ResponseWriter, r *http.Request) {

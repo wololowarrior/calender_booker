@@ -8,3 +8,6 @@ type User struct {
 	Email     string    `json:"email"`
 	CreatedAt time.Time `json:"created_at,omitempty"`
 }
+
+var StartOfDay = "09:00:00"
+var EndOfDay = "17:00:00"

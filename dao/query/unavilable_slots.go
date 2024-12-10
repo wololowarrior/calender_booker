@@ -19,3 +19,7 @@ var GetOverlappingUnavailableSlots = `
 var DeleteUnavailableSlots = `
 DELETE FROM unavailable_slots
 WHERE id = $1`
+
+var GetUnavailableSlots = `
+SELECT id, start_time, end_time FROM unavailable_slots 
+WHERE uid = $1 AND unavailable_date = $2`
