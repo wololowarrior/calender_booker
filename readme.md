@@ -10,6 +10,26 @@
    1. Which means meeting can be scheduled throughout the day. 
 5. After meeting is booked, a predefined message is sent to the email with call link. 
 
+## MVP
+A calendly like MVP should allow 
+1. user creation
+2. unavailability manager
+3. slot creation, meeting management and customised links
+4. Calender integration
+5. Reminders
+6. Event creation and event duration
+
+My MVP mostly satisfies all of these, some of the complex features like customised link, calender integrations, reminders
+require more engineering and explorations into 3rd party api's which isnt possible in a week.
+
+## Trade OFFs and Hacks
+1. Doing many things via code and not utilising innate RDS features like joins, views.
+   1. To rapidly prototype
+2. Not using date range type in postgres, that would've reduced the number of rows created for unavailability range.
+   1. Instead hacked it by going in a loop and inserting a row for each day.
+3. HACK, some ugliness in code due to not managing date column nicely in postgres. Do to which time.parse is needed in code
+But this doesn't affect things as we mostly don't care about what day it is, just the time is of concern.
+
 ## How to install
 
 ### Start the service
