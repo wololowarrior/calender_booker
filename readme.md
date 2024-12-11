@@ -52,12 +52,13 @@ You should be good to go, fire your api's away
 
 
 ## Future Work
-1. Save the details of who booked the slot. Like name email etc.
+1. Save the details of who booked the slot in db. Like name email etc.
 2. Send email to booker with predefined message and a video call link.
 This can be done using a async worker and queue.
 3. Reminder for a booked meeting to both the booker and user.
 4. Integration with multiple calendars so that unavailable slot / the calendar can be updated with meetings
-5. Support multiple timezones. Display values in local tz
+5. Support multiple timezones. Display values in local tz.
+ 
 
 ## Api Spec
 
@@ -74,6 +75,8 @@ curl --location 'localhost:8080/user' \
 2. GET /user/{id} : Gets an user
 ```shell
 curl --location 'localhost:8080/user/1'
+
+Response
 {
     "id": 1,
     "name": "harshil",
@@ -98,6 +101,8 @@ curl --location --request GET 'localhost:8080/user/1/unavailable' \
 4. GET /user/{id}/unavailable get unavailable time, return days >= current day
 ```shell
 curl --location 'localhost:8080/user/1/unavailable'
+
+Response
 [
     {
         "id": 1,
@@ -122,6 +127,8 @@ curl --location 'localhost:8080/user/1/event' \
 ```shell
 curl --location --request GET 'localhost:8080/user/1/event' \
 --header 'Content-Type: application/json'
+
+Response
 [
     {
         "id": 1,
@@ -136,6 +143,8 @@ curl --location --request GET 'localhost:8080/user/1/event' \
 8. GET /user/{id}/overview get an overview of for a date
 ```shell
 curl --location 'localhost:8080/user/1/overview?date=2024-12-13'
+
+Response
 {
     "unavailable_slots": [
         {
@@ -149,9 +158,9 @@ curl --location 'localhost:8080/user/1/overview?date=2024-12-13'
     "meetings": []
 }
 ```
-GET /user/{id}/meetings to just get the list of meetings
+GET /user/{id}/meetings?date=<optional> to just get the list of meetings 
 ```shell
-curl --location --request GET 'localhost:8080/user/1/meetings?date=YYYY-mm-dd' optional date param
+curl --location --request GET 'localhost:8080/user/1/meetings?date=YYYY-mm-dd'
 ```
 9. GET `/meetings` get available slots for an event on a day
 ```shell
@@ -163,6 +172,7 @@ curl --location --request GET 'localhost:8080/meetings' \
     "event_id":2
 }'
 
+Response
 [
     {
         "id": 0,
