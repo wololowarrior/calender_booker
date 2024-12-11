@@ -8,3 +8,6 @@ SELECT id, uid, name, message, slots FROM event WHERE uid = $1`
 
 var SelectEvent = `
 SELECT uid, name, message, slots FROM event WHERE id = $1`
+
+var DeleteEvent = `
+DELETE FROM event WHERE id = $1 AND uid = $2`

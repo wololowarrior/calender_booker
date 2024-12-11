@@ -31,14 +31,5 @@ SELECT id, start_time, end_time FROM meetings WHERE uid = $1 AND date=$2`
 var GetMeeting = `
 select uid, date,start_time, end_time, event_id FROM meetings WHERE id = $1`
 
-var UpdateMeeting = `
-UPDATE meetings
-SET 
-    start_time = COALESCE($2, start_time),
-    end_time = COALESCE($3, end_time)
-WHERE 
-    id = $1 
-    returning id`
-
 var DeleteMeeting = `
 DELETE FROM meetings WHERE id = $1 returning id`

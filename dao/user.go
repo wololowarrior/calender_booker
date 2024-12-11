@@ -11,7 +11,7 @@ import (
 	"github.com/lib/pq"
 )
 
-func Get(userID int) (*models.User, error) {
+func GetUser(userID int) (*models.User, error) {
 	var user models.User
 	err := db.DB.QueryRow(query.GetUser, userID).Scan(&user.ID, &user.Name, &user.Email, &user.CreatedAt)
 	if err != nil {

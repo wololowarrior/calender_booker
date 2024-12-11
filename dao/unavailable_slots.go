@@ -13,7 +13,7 @@ import (
 )
 
 func CreateUnavailableSlots(slot *models.UnavailableSlot) error {
-	toRemove, toAdd, err2 := getOverlappingSlots(slot.UID, slot.UnavailableDate, *slot.StartTime, *slot.EndTime)
+	toRemove, toAdd, err2 := getMergableSlots(slot.UID, slot.UnavailableDate, *slot.StartTime, *slot.EndTime)
 	if err2 != nil {
 		return err2
 	}
@@ -33,16 +33,10 @@ func CreateUnavailableSlots(slot *models.UnavailableSlot) error {
 			return err
 		}
 	}
-	if toAdd == nil {
-		log.Println(slot.UID, slot.UnavailableDate, slot.StartTime, slot.EndTime)
-		err := db.DB.QueryRow(query.InsertUnavailableSlots, slot.UID, slot.UnavailableDate, slot.StartTime, slot.EndTime).Scan(&slot.ID, &slot.CreatedAt)
-		if err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
+// GetUnavailableSlots returns the range where the user is unavailable for a meeting
 func GetUnavailableSlots(uid int) ([]*models.UnavailableSlot, error) {
 	rows, err := db.DB.Query(query.SelectUnavailableSlots, uid)
 	if err != nil {
@@ -97,7 +91,8 @@ func deleteUnavailableSlots(id int) error {
 	return nil
 }
 
-func getOverlappingSlots(uid int, date, startTime, endTime string) ([]*models.UnavailableSlot, []*models.UnavailableSlot, error) {
+// getMergableSlots returns the unavailable slots for the user which can be merged together
+func getMergableSlots(uid int, date, startTime, endTime string) ([]*models.UnavailableSlot, []*models.UnavailableSlot, error) {
 	// Parse the input start and end times
 	inputStartTime, err := time.Parse("15:04:05", startTime)
 	if err != nil {
@@ -107,7 +102,6 @@ func getOverlappingSlots(uid int, date, startTime, endTime string) ([]*models.Un
 	if err != nil {
 		return nil, nil, errors.New("invalid end time")
 	}
-	log.Println(inputStartTime, inputEndTime)
 	rows, err := db.DB.Query(query.GetOverlappingUnavailableSlots, uid, date, startTime, endTime)
 	if rows == nil {
 		return nil, nil, err
@@ -117,6 +111,8 @@ func getOverlappingSlots(uid int, date, startTime, endTime string) ([]*models.Un
 	var overlappingSlots []*models.UnavailableSlot
 	earliestStartTime := inputStartTime
 	latestEndTime := inputEndTime
+
+	//it checks from the db returned start and end time if theres anything before or later than the time in request
 
 	for rows.Next() {
 		var id int
@@ -153,11 +149,11 @@ func getOverlappingSlots(uid int, date, startTime, endTime string) ([]*models.Un
 		})
 	}
 
-	// Convert merged time back to string for JSON response
 	earliestStartTimeStr := earliestStartTime.Format("15:04:05")
 	latestEndTimeStr := latestEndTime.Format("15:04:05")
 
 	// Return slots to remove and the merged slot to add
+	// basically removed slots are merged into one big slot because of the addition of the slot requested
 	toRemove := overlappingSlots
 	toAdd := []*models.UnavailableSlot{
 		{

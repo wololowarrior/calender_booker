@@ -48,3 +48,14 @@ func GetEvent(id int) (*models.Event, error) {
 	}
 	return &event, nil
 }
+
+func DeleteEvent(id int, userID int) error {
+	_, err := db.DB.Exec(query.DeleteEvent, id, userID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return errors.New("event doesn't exist")
+		}
+		return err
+	}
+	return nil
+}

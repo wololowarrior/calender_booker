@@ -149,9 +149,19 @@ curl --location 'localhost:8080/user/1/overview?date=2024-12-13'
     "meetings": []
 }
 ```
-9. GET `/meetings?event_id=1&user_id=1&date=2024-12-12` get available slots for an event on a day
+GET /user/{id}/meetings to just get the list of meetings
 ```shell
-curl --location 'localhost:8080/meetings?event_id=1&user_id=1&date=2024-12-12'
+curl --location --request GET 'localhost:8080/user/1/meetings?date=YYYY-mm-dd' optional date param
+```
+9. GET `/meetings` get available slots for an event on a day
+```shell
+curl --location --request GET 'localhost:8080/meetings' \
+--header 'Content-Type: application/json' \
+--data '{
+    "uid":1,
+    "date": "2024-12-13",
+    "event_id":2
+}'
 
 [
     {

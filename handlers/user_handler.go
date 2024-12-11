@@ -26,7 +26,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "'id' must be an integer", http.StatusBadRequest)
 		return
 	}
-	user, err := dao.Get(userID)
+	user, err := dao.GetUser(userID)
 	if err != nil {
 		if err.Error() == fmt.Sprintf("user with ID %d not found", userID) {
 			http.Error(w, err.Error(), http.StatusNotFound)

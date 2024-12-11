@@ -27,6 +27,18 @@ func CreateUnavailabilitySlots(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "'userid' must be an integer", http.StatusBadRequest)
 		return
 	}
+
+	_, err = dao.GetUser(userID)
+	if err != nil {
+		if err.Error() == fmt.Sprintf("user with ID %d not found", userID) {
+			http.Error(w, err.Error(), http.StatusNotFound)
+		} else {
+			http.Error(w, "failed to retrieve user", http.StatusInternalServerError)
+			log.Printf("Error retrieving user: %v", err)
+		}
+		return
+	}
+
 	decoder := json.NewDecoder(r.Body)
 	var input models.UnavailableSlots
 	err = decoder.Decode(&input)
@@ -35,7 +47,9 @@ func CreateUnavailabilitySlots(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to decode request body", http.StatusBadRequest)
 		return
 	}
+
 	input.UID = userID
+
 	startDate, err := time.Parse("2006-01-02", input.StartDate)
 	if err != nil {
 		http.Error(w, "Invalid start_date format", http.StatusBadRequest)
@@ -46,6 +60,8 @@ func CreateUnavailabilitySlots(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid end_date format", http.StatusBadRequest)
 		return
 	}
+
+	//loop through the date range start-end
 	for d := startDate; !d.After(endDate); d = d.AddDate(0, 0, 1) {
 		slot := &models.UnavailableSlot{
 			UnavailableDate: d.Format("2006-01-02"),

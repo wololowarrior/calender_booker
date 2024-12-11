@@ -33,7 +33,7 @@ func CreateMeetings(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Print(err.Error())
 		if err.Error() == "unavailable during selected time" {
-			http.Error(w, "Meeting not available. Select another slot", http.StatusServiceUnavailable)
+			http.Error(w, "User not available. Select another slot", http.StatusServiceUnavailable)
 			return
 		}
 		http.Error(w, "Failed to save meeting", http.StatusInternalServerError)
@@ -45,18 +45,25 @@ func CreateMeetings(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetMeetingsFromEvent(w http.ResponseWriter, r *http.Request) {
-	queryParams := r.URL.Query()
-	eventID, err := strconv.Atoi(queryParams.Get("event_id"))
+	decoder := json.NewDecoder(r.Body)
+	var meeting models.Meeting
+	err := decoder.Decode(&meeting)
 	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, "Failed to decode request body", http.StatusBadRequest)
+		return
+	}
+	eventID := meeting.EventID
+	if eventID == 0 {
 		http.Error(w, "Invalid event_id", http.StatusBadRequest)
 		return
 	}
-	userID, err := strconv.Atoi(queryParams.Get("user_id"))
-	if err != nil {
+	userID := meeting.UID
+	if userID == 0 {
 		http.Error(w, "Invalid user_id", http.StatusBadRequest)
 	}
 
-	date := queryParams.Get("date")
+	date := meeting.Date
 
 	event, err := dao.GetEvent(eventID)
 	if err != nil {
@@ -73,7 +80,7 @@ func GetMeetingsFromEvent(w http.ResponseWriter, r *http.Request) {
 	} else {
 		slot = *event.Slots
 	}
-	slots, err := dao.GetSlottedMeetings(userID, slot, date)
+	slots, err := dao.GetSlottedMeetingsRecommendation(userID, slot, date)
 	if err != nil {
 		log.Print(err.Error())
 		http.Error(w, "Failed to get event", http.StatusInternalServerError)
@@ -113,6 +120,7 @@ func UpdateMeeting(w http.ResponseWriter, r *http.Request) {
 	log.Println(m)
 	if err != nil {
 		http.Error(w, "Failed to decode request body", http.StatusBadRequest)
+		return
 	}
 	err = dao.UpdateMeeting(&m)
 	if err != nil {
@@ -121,6 +129,7 @@ func UpdateMeeting(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		http.Error(w, "Failed to save meeting", http.StatusInternalServerError)
+		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)

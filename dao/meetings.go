@@ -65,7 +65,7 @@ func ValidMeeting(meeting *models.Meeting) (error, bool) {
 	return nil, true
 }
 
-func GetSlottedMeetings(userID int, slotDuration, date string) (*[]models.Meeting, error) {
+func GetSlottedMeetingsRecommendation(userID int, slotDuration, date string) (*[]models.Meeting, error) {
 	//query unavailable
 	rows, err := db.DB.Query(query.GetUnavailableSlots, userID, date)
 	if err != nil {
@@ -209,22 +209,20 @@ func GetMeeting(meeting *models.Meeting) error {
 }
 
 func UpdateMeeting(meeting *models.Meeting) error {
+	err := DeleteMeeting(meeting)
+	if err != nil {
+		return err
+	}
 	err, valid := ValidMeeting(meeting)
 	if !valid {
 		return errors.New("invalid Meeting")
 	}
-	var id int
-	err = db.DB.QueryRow(query.UpdateMeeting, meeting.ID, meeting.StartTime, meeting.EndTime).Scan(&id)
+	//var id int
+	//err = db.DB.QueryRow(query.UpdateMeeting, meeting.ID, meeting.StartTime, meeting.EndTime).Scan(&id)
+	err = CreateMeeting(meeting)
 	if err != nil {
 		return err
 	}
-
-	/*
-
-		After this push an event to the worker with the email of the person booking the slot.
-		The worker would generate a meets/zoom link and send an email to the person with details
-
-	*/
 
 	return nil
 }
@@ -239,8 +237,18 @@ func DeleteMeeting(meeting *models.Meeting) error {
 }
 
 func GetBookedMeetings(userID int, date string) ([]*models.Meeting, error) {
-	getQuery := `SELECT id,start_time, end_time, event_id, created_at FROM meetings WHERE uid = $1 AND date=$2`
-	rows, err := db.DB.Query(getQuery, userID, date)
+	var getQuery string
+	var rows *sql.Rows
+	var err error
+	if date != "" {
+		getQuery = `SELECT id,start_time, end_time, event_id, created_at FROM meetings WHERE uid = $1 AND date=$2`
+		rows, err = db.DB.Query(getQuery, userID, date)
+
+	} else {
+		getQuery = `SELECT id,start_time, end_time, event_id, created_at FROM meetings WHERE uid = $1`
+		rows, err = db.DB.Query(getQuery, userID)
+
+	}
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, err
