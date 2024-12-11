@@ -5,18 +5,20 @@
    2. offering of meeting slots against that event
    3. customisation of slot duration (30m, 60m)
    4. an automated message to be sent when a slot is booked
-3. The user is available throughout the day, but slot timing are restricted from 9am to 5pm
+3. Currently Only supporting one timezone. Or rather no timezone just working with plain clock numbers. 
+4. The user is available throughout the day, but slot timing are restricted from 9am to 5pm
    1. Which means meeting can be scheduled throughout the day. 
-4. After meeting is booked, a predefined message is sent to the email with call link. 
+5. After meeting is booked, a predefined message is sent to the email with call link. 
 
 ## How to install
 
 ### Start the service
-Install Docker if needed
-1. https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
-2. sudo service docker status. Start if needed
-3. Clone the repo and cd inside it
-4. Run `sudo docker-compose up` from the base dir. It should build the app image and start the container with the postgres
+1. Install Docker if needed
+2. https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
+3. `sudo service docker status`. Start docker if needed
+4. Clone the repo and `cd` inside it
+5. Run `sudo docker-compose up` from the base dir. It should build the app image for the first time and start the container with the postgres
+   1. Give `--build` tag if you want to force build.
 
 ### Install Goose to support postgres migration
 
@@ -24,23 +26,29 @@ Install Docker if needed
 ```shell
 curl -fsSL     https://raw.githubusercontent.com/pressly/goose/master/install.sh |    sudo sh
 ```
-2. `goose -dir ./db/migrations postgres "$DB_URL" up`
+2. Run migrations
 ```shell
 EXPORT DB_URL=postgres://postgres:password@localhost:5432/calendly?sslmode=disable
+goose -dir ./db/migrations postgres "$DB_URL" up
+```
+3. Nuke the db
+```shell
+goose -dir ./db/migrations postgres "$DB_URL" reset
 ```
 
 You should be good to go, fire your api's away
 
 ## How to play
-1. Create a user
-2. Get the list of unavailable time. Create unavailable time if needed. 
-3. Create an event for ex Recruitment (for eg xyz, Book my calender to make a sale). 
+1. Create a user 
+2. Get the list of unavailable time. Create unavailable time if needed. See #3 in [api spec](#api-spec). 
+3. Create an event (for ex Recruitment xyz position, Book my calender to make a sale). See #5 in [api spec](#api-spec)
    1. Define a message that can be sent to the
    person booking it
-   2. Get the event list that you've created
-4. Get available slots for the person. 
-5. Book a meeting, specify the event ID.
-6. You can also choose to reschedule the meeting or cancel it if plans change
+   2. Maybe, get the event list that you've created. See #6 in [api spec](#api-spec)
+   3. Or an overview of the day. See #8 in [api spec](#api-spec)
+4. Get available slots for the user. See #9 in [api spec](#api-spec)
+5. Book a meeting, specify the event ID. See #10 in [api spec](#api-spec)
+6. You can also choose to reschedule the meeting or cancel it if plans change. See #12 in [api spec](#api-spec)
 
 
 ## Future Work
@@ -49,7 +57,7 @@ You should be good to go, fire your api's away
 This can be done using a async worker and queue.
 3. Reminder for a booked meeting to both the booker and user.
 4. Integration with multiple calendars so that unavailable slot / the calendar can be updated with meetings
-5. 
+5. Support multiple timezones. Display values in local tz
 
 ## Api Spec
 
@@ -180,7 +188,7 @@ curl --location 'localhost:8080/meetings' \
 }'
 ```
 11. GET /meetings/{id} Get the meeting
-12. PUT /meetings/{id} update a meeting 
+12. PUT /meetings/{id} update a meeting. Update end_time or start_time. This validates if the slot is possible or not
 ```shell
 curl --location --request PUT 'localhost:8080/meetings/5' \
 --header 'Content-Type: application/json' \
