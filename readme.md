@@ -10,15 +10,34 @@
 4. After meeting is booked, a predefined message is sent to the email with call link. 
 
 ## How to install
-1. Clone the repo and cd inside it
-2. Run `docker-compose up` from the base dir.
-3. You should be good to go, fire your api's away
+
+### Start the service
+Install Docker if needed
+1. https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
+2. sudo service docker status. Start if needed
+3. Clone the repo and cd inside it
+4. Run `sudo docker-compose up` from the base dir. It should build the app image and start the container with the postgres
+
+### Install Goose to support postgres migration
+
+1. https://pressly.github.io/goose/installation/
+```shell
+curl -fsSL     https://raw.githubusercontent.com/pressly/goose/master/install.sh |    sudo sh
+```
+2. `goose -dir ./db/migrations postgres "$DB_URL" up`
+```shell
+EXPORT DB_URL=postgres://postgres:password@localhost:5432/calendly?sslmode=disable
+```
+
+You should be good to go, fire your api's away
 
 ## How to play
 1. Create a user
-2. Create unavailable time if needed.
-3. Create an event for ex Recruitment for xyz, Book my calender to make a sale. Define a message that can be sent to the
-person booking it
+2. Get the list of unavailable time. Create unavailable time if needed. 
+3. Create an event for ex Recruitment (for eg xyz, Book my calender to make a sale). 
+   1. Define a message that can be sent to the
+   person booking it
+   2. Get the event list that you've created
 4. Get available slots for the person. 
 5. Book a meeting, specify the event ID.
 6. You can also choose to reschedule the meeting or cancel it if plans change
@@ -36,7 +55,7 @@ This can be done using a async worker and queue.
 
 1. POST /user : This will create a user whose calendar is maintained
 ```shell
-curl --location 'localhost:8080/users' \
+curl --location 'localhost:8080/user' \
 --header 'Content-Type: application/json' \
 --data '{
     "name": "harshil",
@@ -82,18 +101,18 @@ curl --location 'localhost:8080/user/1/unavailable'
     }
 ]
 ```
-5. POST /users/{id}/event create an event
+5. POST /user/{id}/event create an event
 ```shell
-curl --location 'localhost:8080/users/1/event' \
+curl --location 'localhost:8080/user/1/event' \
 --header 'Content-Type: application/json' \
 --data '{
     "name": "test",
     "slots":"30"
 }'
 ```
-6. GET /users/{id}/event list all event
+6. GET /user/{id}/event list all event
 ```shell
-curl --location --request GET 'localhost:8080/users/1/event' \
+curl --location --request GET 'localhost:8080/user/1/event' \
 --header 'Content-Type: application/json'
 [
     {
@@ -105,10 +124,10 @@ curl --location --request GET 'localhost:8080/users/1/event' \
     }
 ]
 ```
-7. DELETE /users/{id}/event/{event_id} delete an event
-8. GET /users/{id}/overview get an overview of for a date
+7. DELETE /user/{id}/event/{event_id} delete an event
+8. GET /user/{id}/overview get an overview of for a date
 ```shell
-curl --location 'localhost:8080/users/1/overview?date=2024-12-13'
+curl --location 'localhost:8080/user/1/overview?date=2024-12-13'
 {
     "unavailable_slots": [
         {
@@ -122,9 +141,10 @@ curl --location 'localhost:8080/users/1/overview?date=2024-12-13'
     "meetings": []
 }
 ```
-9. GET /meetings?event_id=1&user_id=1&date=2024-12-12 get available slots for an event on a day
+9. GET `/meetings?event_id=1&user_id=1&date=2024-12-12` get available slots for an event on a day
 ```shell
 curl --location 'localhost:8080/meetings?event_id=1&user_id=1&date=2024-12-12'
+
 [
     {
         "id": 0,
@@ -159,7 +179,8 @@ curl --location 'localhost:8080/meetings' \
     "event_id":1
 }'
 ```
-11. PUT /meetings/{id} update a meeting 
+11. GET /meetings/{id} Get the meeting
+12. PUT /meetings/{id} update a meeting 
 ```shell
 curl --location --request PUT 'localhost:8080/meetings/5' \
 --header 'Content-Type: application/json' \
@@ -167,5 +188,5 @@ curl --location --request PUT 'localhost:8080/meetings/5' \
     "end_time":"11:00:00"
 }'
 ```
-12. DELETE /meetings/{id}
-13. GET /meetings/{id}
+13. DELETE /meetings/{id}
+

@@ -32,6 +32,10 @@ func CreateMeetings(w http.ResponseWriter, r *http.Request) {
 	err = dao.CreateMeeting(&meeting)
 	if err != nil {
 		log.Print(err.Error())
+		if err.Error() == "unavailable during selected time" {
+			http.Error(w, "Meeting not available. Select another slot", http.StatusServiceUnavailable)
+			return
+		}
 		http.Error(w, "Failed to save meeting", http.StatusInternalServerError)
 		return
 	}

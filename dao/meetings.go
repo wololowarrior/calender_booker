@@ -45,7 +45,7 @@ func ValidMeeting(meeting *models.Meeting) (error, bool) {
 		}
 	}
 	if unavailableID != 0 {
-		return errors.New("unavailable during selected time"), true
+		return errors.New("unavailable during selected time"), false
 	}
 
 	// is clasing with other meetings
@@ -57,8 +57,10 @@ func ValidMeeting(meeting *models.Meeting) (error, bool) {
 			return err, false
 		}
 	}
+
 	if meetingID != 0 {
-		return errors.New("clashing with another meeting"), true
+		log.Println("clashing meeting")
+		return errors.New("unavailable during selected time"), false
 	}
 	return nil, true
 }
