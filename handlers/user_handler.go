@@ -51,7 +51,8 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("Error creating user: %s", err)
 		if err.Error() == fmt.Sprintf("user with ID %d already exists", user.ID) {
-			http.Error(w, err.Error(), http.StatusConflict)
+			http.Error(w, "user already exists", http.StatusConflict)
+			return
 		}
 		http.Error(w, "Failed to create user", http.StatusInternalServerError)
 		return
@@ -59,4 +60,29 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)
+}
+
+func Overview(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userIDStr, ok := vars["id"]
+	if !ok {
+		http.Error(w, "missing 'id' in URL path", http.StatusBadRequest)
+		return
+	}
+
+	// Convert the ID to an integer
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		http.Error(w, "'id' must be an integer", http.StatusBadRequest)
+		return
+	}
+	query := r.URL.Query()
+	date := query.Get("date")
+	overview, err := dao.Overview(userID, date)
+	if err != nil {
+		log.Printf("Error getting overview: %s", err)
+		http.Error(w, "Failed to retrieve overview", http.StatusInternalServerError)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(overview)
 }

@@ -11,3 +11,8 @@ type User struct {
 
 var StartOfDay = "09:00:00"
 var EndOfDay = "17:00:00"
+
+type Overview struct {
+	UnavailableSlots []*UnavailableSlot `json:"unavailable_slots"`
+	Meetings         []*Meeting         `json:"meetings"`
+}

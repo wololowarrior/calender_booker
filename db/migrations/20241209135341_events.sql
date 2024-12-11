@@ -6,7 +6,6 @@ CREATE TABLE event (
     uid int NOT NULL,
     name VARCHAR(255) NOT NULL,
     message VARCHAR(255),
-    slotted boolean DEFAULT false,
     slots slots_type,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_users FOREIGN KEY (uid) REFERENCES users(id) ON DELETE CASCADE

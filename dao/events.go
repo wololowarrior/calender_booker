@@ -10,7 +10,7 @@ import (
 )
 
 func InsertEvent(event *models.Event) error {
-	err := db.DB.QueryRow(query.InsertEvent, event.UID, event.Name, event.Message, event.Slotted, event.Slots).Scan(&event.ID)
+	err := db.DB.QueryRow(query.InsertEvent, event.UID, event.Name, event.Message, event.Slots).Scan(&event.ID)
 	if err != nil {
 		return err
 	}
@@ -27,7 +27,7 @@ func GetAllEvents(uid int) ([]*models.Event, error) {
 	events = make([]*models.Event, 0)
 	for rows.Next() {
 		var event models.Event
-		err = rows.Scan(&event.ID, &event.UID, &event.Name, &event.Message, &event.Slotted, &event.Slots)
+		err = rows.Scan(&event.ID, &event.UID, &event.Name, &event.Message, &event.Slots)
 		if err != nil {
 			return nil, err
 		}
@@ -38,7 +38,7 @@ func GetAllEvents(uid int) ([]*models.Event, error) {
 
 func GetEvent(id int) (*models.Event, error) {
 	var event models.Event
-	err := db.DB.QueryRow(query.SelectEvent, id).Scan(&event.UID, &event.Name, &event.Message, &event.Slotted, &event.Slots)
+	err := db.DB.QueryRow(query.SelectEvent, id).Scan(&event.UID, &event.Name, &event.Message, &event.Slots)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

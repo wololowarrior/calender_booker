@@ -63,8 +63,12 @@ func GetMeetingsFromEvent(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to get event", http.StatusInternalServerError)
 		return
 	}
-
-	slot := *event.Slots
+	var slot string
+	if event.Slots == nil {
+		slot = "60"
+	} else {
+		slot = *event.Slots
+	}
 	slots, err := dao.GetSlottedMeetings(userID, slot, date)
 	if err != nil {
 		log.Print(err.Error())

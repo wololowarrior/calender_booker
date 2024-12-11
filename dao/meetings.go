@@ -3,7 +3,6 @@ package dao
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"log"
 	"sort"
 	"strconv"
@@ -25,6 +24,14 @@ func CreateMeeting(meeting *models.Meeting) error {
 	if err != nil {
 		return err
 	}
+
+	/*
+
+		After this push an event to the worker with the email of the person booking the slot.
+		The worker would generate a meets/zoom link and send an email to the person with details
+
+	*/
+
 	return nil
 }
 
@@ -90,7 +97,6 @@ func GetSlottedMeetings(userID int, slotDuration, date string) (*[]models.Meetin
 	endofDay, err := time.Parse("15:04:05", models.EndOfDay)
 	duration, _ := strconv.Atoi(slotDuration)
 	unusedSlots := generateUnusedSlots(startOfDay, endofDay, slots, time.Duration(duration)*time.Minute)
-	fmt.Println(unusedSlots)
 	meetingSlots := make([]models.Meeting, 0)
 	for _, timeSlot := range unusedSlots {
 		meeting := models.Meeting{
@@ -210,6 +216,14 @@ func UpdateMeeting(meeting *models.Meeting) error {
 	if err != nil {
 		return err
 	}
+
+	/*
+
+		After this push an event to the worker with the email of the person booking the slot.
+		The worker would generate a meets/zoom link and send an email to the person with details
+
+	*/
+
 	return nil
 }
 

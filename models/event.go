@@ -5,6 +5,5 @@ type Event struct {
 	UID     int     `json:"uid"`
 	Name    string  `json:"name"`
 	Message string  `json:"message"`
-	Slotted bool    `json:"slotted,omitempty"`
 	Slots   *string `json:"slots,omitempty"`
 }
